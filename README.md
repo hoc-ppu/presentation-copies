@@ -12,9 +12,9 @@ The XML file can then be imported into an indesign template which will then crea
 * Insert Link
 * Link helps to find content from two Hansard APIs
 * The end of the URL has FindDebateByContributionId
-* [Hansard Search FindDebateByContributionId] (https://hansard-api.parliament.uk/swagger/ui/index#!/Search/Search_FindDebateByContributionId)
+* [Hansard Search FindDebateByContributionId](https://hansard-api.parliament.uk/swagger/ui/index#!/Search/Search_FindDebateByContributionId)
 * The data returned has a DebateSectionExtId, which the script uses to find the full details of the debate
-* This is in the [Hansard Debate] (https://hansard-api.parliament.uk/swagger/ui/index#!/Debates/Debates_GetDebate)
+* This is in the [Hansard Debate](https://hansard-api.parliament.uk/swagger/ui/index#!/Debates/Debates_GetDebate)
 * The speech itself can then be found by using the contribution ID that is collected from the URL earlier
 
 ## Why the project is useful
@@ -26,7 +26,7 @@ This takes a 30+ min process into a process which takes a few minutes.
 ### Users will need
 * A code editor - Our team uses VSCode
 * Indesign
-* The [Hansard website] (https://hansard.parliament.uk/) or the [library index spreadsheet] (https://commonslibrary.parliament.uk/research-briefings/sn04588/)
+* The [Hansard website](https://hansard.parliament.uk/) or the [library index spreadsheet](https://commonslibrary.parliament.uk/research-briefings/sn04588/)
 * Member name, date of speech or debate 
 
 ### Create XML
