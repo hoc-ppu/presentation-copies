@@ -25,7 +25,6 @@ response = requests.get(ext_id_url)
 DebateSectionExtId_data = response.json()
 
 # use the response to get the DebateSectionExtId value
-
 for item in DebateSectionExtId_data.get("Results", []):
     DebateSectionExtId = item.get("DebateSectionExtId")
 
@@ -52,9 +51,7 @@ for item in maiden_speech_data.get("Items", []):
         member_details = item.get("AttributedTo")
 
 # adding extra info that can be automated later
-
 chamber = "House of Commons"
-
 speech_type = "The Maiden Speech"
 
 # split atrributedto value into member name and details of member
