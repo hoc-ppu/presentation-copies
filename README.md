@@ -43,7 +43,7 @@ This takes a 30+ min process into a process which takes a few minutes.
 * the file will save in this project folder
 
 ### Steps for using the data in indesign
-#### For oroducing one PDF at a time
+#### For producing one PDF at a time
 * Indesign template can be found in PPU sharepoint under Technology Team / projects / Current Production
 * Open template
 * File > Import XML > Use browse function to go to where data was saved
