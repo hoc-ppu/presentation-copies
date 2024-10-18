@@ -9,7 +9,7 @@ Creates an XML file of a MPs speech using a link either from the hansard website
 The XML file can then be imported into an indesign template which will then create a front presentation page followed by a copy of the speech from Hansard.
 
 
-### How it works - No GUI
+### How it works
 * Insert Link into presentations-copies-script
 * Link helps to find content from two Hansard APIs
 * The end of the URL has FindDebateByContributionId
@@ -26,9 +26,11 @@ This takes a 30+ min process into a process which takes a few minutes.
 ## How users can get started with the project
 ### Users will need
 * A code editor - Our team uses VSCode
-* Indesign
+* Indesign Template
 * The [Hansard website](https://hansard.parliament.uk/) or the [library index spreadsheet](https://commonslibrary.parliament.uk/research-briefings/sn04588/)
 * Member name, date of speech or debate 
+* a virtual environment
+* install the packages (please see scripts - I will update this part of the readme)
 
 ### Create XML - With GUI
 * Run the production-gui python file
@@ -39,6 +41,22 @@ This takes a 30+ min process into a process which takes a few minutes.
 * insert link into the presentation-copies-script python file
 * Run the script
 * the file will save in this project folder
+
+### Steps for using the data in indesign
+#### For oroducing one PDF at a time
+* Indesign template can be found in PPU sharepoint under Technology Team / projects / Current Production
+* Open template
+* File > Import XML > Use browse function to go to where data was saved
+* Click OK when window prompt offers some options/ default is fine
+
+#### For producing lots of documents at once (both pdf and indesign files)
+* all the data needs to be ready in one file
+* follow steps for ensuring your indesign has access to the team scripts folder called PPU ID Scripts - update this step
+* open indesign > windows > utilities > scripts 
+* click on scrip called batch import xml to indd pdf
+* select the appropriate output and input folders and files
+* export as high quality print
+* the documents will save in the selected folders
 
 ## Where users can get help with your project
 Nikki in the Tech team in PPU
