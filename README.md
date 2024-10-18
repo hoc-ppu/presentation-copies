@@ -8,8 +8,9 @@ Or on occassion MPs or other external organisations/people request presentation 
 Creates an XML file of a MPs speech using a link either from the hansard website or using the commons library index.
 The XML file can then be imported into an indesign template which will then create a front presentation page followed by a copy of the speech from Hansard.
 
-### How it works
-* Insert Link
+
+### How it works - No GUI
+* Insert Link into presentations-copies-script
 * Link helps to find content from two Hansard APIs
 * The end of the URL has FindDebateByContributionId
 * [Hansard Search FindDebateByContributionId](https://hansard-api.parliament.uk/swagger/ui/index#!/Search/Search_FindDebateByContributionId)
@@ -29,9 +30,18 @@ This takes a 30+ min process into a process which takes a few minutes.
 * The [Hansard website](https://hansard.parliament.uk/) or the [library index spreadsheet](https://commonslibrary.parliament.uk/research-briefings/sn04588/)
 * Member name, date of speech or debate 
 
-### Create XML
-* If using 
+### Create XML - With GUI
+* Run the production-gui python file
+* Opens a GUI, which asks for the website URL and for a folder location
+* Saves the XML for the speech in the shared folder
+
+### Create XML - Without GUI
+* insert link into the presentation-copies-script python file
+* Run the script
+* the file will save in this project folder
 
 ## Where users can get help with your project
+Nikki in the Tech team in PPU
 
 ## Who maintains and contributes to the project
+The Tech team in PPU

@@ -4,7 +4,7 @@ from datetime import datetime
 
 # insert ####### share link from website or from library spreadsheet
 # interruption example https://hansard.parliament.uk/Commons/2024-09-09/debates/EA3CE383-F88C-4A9B-B230-F2424184F408/Transport#contribution-ED93B984-A121-41FB-A611-8D2438E2E111
-share_link = "https://hansard.parliament.uk/Commons/2024-09-12/debates/61C7B41F-51DE-4257-9E39-3FFE75E1B0CE/SirDavidAmessAdjournmentDebate#contribution-F852082E-7A23-4995-BE9A-AE7D7BBEF7F9"
+share_link = "https://hansard.parliament.uk/Commons/2024-10-10/debates/4D26F1DB-5194-49CD-85CF-087377B7A3DB/SportTeamGBAndParalympicsgb#contribution-B7C30195-448D-4087-9106-EDDC8FC517B7"
 
 # splitting the share link #contribution-
 string_split = share_link.split("#contribution-")
@@ -125,5 +125,10 @@ for em in output_element.xpath("//em"):
 for element in output_element.iterchildren():
     element.tail = "\n"
 
+# gets member name for file name
+member_name_split = member_name.split()
+firstname = member_name_split[0]
+lastname = member_name_split[1]
+
 output_tree = etree.ElementTree(output_element)
-output_tree.write("maiden-speech-hrs-1.xml", encoding="utf-8")
+output_tree.write(firstname + "_" + lastname + ".xml", encoding="utf-8")
