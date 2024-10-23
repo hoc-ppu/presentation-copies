@@ -1,11 +1,13 @@
+from datetime import datetime
+from pathlib import Path
+
 import requests
 from lxml import etree
-from datetime import datetime
 
 # this function is the same as the presentation copies script
 # turned into a function to use with tkinter GUI
 
-def get_speech(share_link, output_folder):
+def get_speech(share_link: str, output_folder: str):
     # inserts link from production-gui
 
     # splitting the share link #contribution-
@@ -28,6 +30,7 @@ def get_speech(share_link, output_folder):
 
     # use the response to get the DebateSectionExtId value
     for item in DebateSectionExtId_data.get("Results", []):
+        # TODO: Handle cases where there are no results
         DebateSectionExtId = item.get("DebateSectionExtId")
 
     # create URL that fetches the maiden speech content and the title of the speech
@@ -68,7 +71,7 @@ def get_speech(share_link, output_folder):
     formatted_date = dt.strftime("%d %B %Y")
 
     hour = dt.strftime("%I").lstrip("0")  # Get hour and remove leading zero
-    formatted_time = f"{hour}.{dt.strftime('%M').lstrip('0')}{dt.strftime('%p').lower()}" 
+    formatted_time = f"{hour}.{dt.strftime('%M').lstrip('0')}{dt.strftime('%p').lower()}"
 
     # creating a list which splits on line break and removes empty paragraphs
     para_list = [para for para in speech.split("\n") if para.strip()]
@@ -92,7 +95,7 @@ def get_speech(share_link, output_folder):
     title_element = etree.SubElement(output_element, 'hs_2GenericHdg')
     title_element.text = debate_title.strip()
 
-    # adding timecode element 
+    # adding timecode element
     time_element = etree.SubElement(output_element, 'hs_Timeline')
     time_element.text = formatted_time.strip()
 
@@ -126,11 +129,14 @@ def get_speech(share_link, output_folder):
 
     for element in output_element.iterchildren():
         element.tail = "\n"
-        
-    #gets member name for file name
+
+    # gets member name for file name
     member_name_split = member_name.split()
+    # TODO: Handle cases where the member has multiple first names or last names
     firstname = member_name_split[0]
     lastname = member_name_split[1]
 
+    output_file_path = Path(output_folder, f"{firstname}_{lastname}.xml")
+
     output_tree = etree.ElementTree(output_element)
-    output_tree.write(output_folder + "\\" + firstname + "_" + lastname + ".xml", encoding="utf-8")
+    output_tree.write(str(output_file_path), encoding="utf-8")
