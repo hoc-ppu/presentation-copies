@@ -7,6 +7,8 @@ from lxml.etree import SubElement
 
 MISSING_TITLE = "INSERT TITLE"
 
+HANSARD_DEBATES_URL_BASE = "https://hansard-api.parliament.uk/debates/debate/"
+
 # this function is the same as the presentation copies script
 # turned into a function to use with tkinter GUI
 
@@ -14,8 +16,15 @@ MISSING_TITLE = "INSERT TITLE"
 # TODO: add instruction to screenshot/report error to documentation
 # TODO: add raised exceptions as "e" for logger?
 
+# TODO: consider adding a logger
+
 
 def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
+    # TODO: consider revising the doc string
+    """
+    This function takes a share link from the production-gui and
+    returns an XML file with the speech content.
+    """
     # inserts link from production-gui
     # TODO: has user entered expected format
 
@@ -49,14 +58,17 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     # use the response to get the DebateSectionExtId value
     for item in DebateSectionExtId_data.get("Results", []):
         DebateSectionExtId = item.get("DebateSectionExtId")
-    # TODO: does this ever get raised? Does function above return NoneType?
+    # TODO: does this ever get raised? Does function above return NoneType? YES
     if not DebateSectionExtId:
-        raise Exception(f"Unable to find DebateSectionExtId in search results {ext_id_url}. Check for typos pasted link and try again")
+        raise Exception(
+            f"Unable to find DebateSectionExtId in search results {ext_id_url}."
+            " Check for typos pasted link and try again"
+        )
 
     # create URL that fetches the maiden speech content and the
     # title of the speech
-    create_url_template = "https://hansard-api.parliament.uk/debates/debate/{}.json"
-    url = create_url_template.format(DebateSectionExtId)
+    create_url_template = "{}{}.json"
+    url = create_url_template.format(HANSARD_DEBATES_URL_BASE, DebateSectionExtId)
 
     # fetching content from hansard API, program ends with error
     try:
@@ -65,22 +77,22 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         maiden_speech_data = response_api.json()
     except Exception:
         raise Exception(
-            f"Problem getting data from the API https://hansard-api.parliament.uk/debates/debate/"
+            f"Problem getting data from the API {HANSARD_DEBATES_URL_BASE}"
         )
 
     overview = maiden_speech_data.get("Overview", {})
 
     debate_title = ""
 
-    # TODO: is a loop necessary? Can we get it directly?
-    debate_title = overview.get("Title", "INSERT TITLE")
-    if debate_title == "INSERT TITLE":
-        warn_title = "No title found in the json"
-
     # TODO: look at using logger instead of below
     warn_title = ""
     warn_datetime = ""
     warn_member_details = ""
+
+    # TODO: is a loop necessary? Can we get it directly?
+    debate_title = overview.get("Title", "INSERT TITLE")
+    if debate_title == "INSERT TITLE":
+        warn_title = "No title found in the json"
 
     # Set default values of below items to none and empty
     # Allows program to run with empty returns
@@ -111,15 +123,25 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     chamber = "House of Commons"
     speech_type = "The Maiden Speech"
 
+    member_name = "INSERT MEMBER NAME"
+    cons = "INSERT CONSTITUENCY"
+    party = "PARTY"
+
     if member_details:
         # split attributed to value into member name and details of member
-        member_name, cons, party = member_details.split(" (")
-        cons = cons.rstrip(")")  # Remove the trailing parenthesis
-        party = party.rstrip(")")  # Remove the trailing parenthesis
+        member_splits = member_details.split(" (")
+        try:
+            member_name = member_splits[0]
+            cons = member_splits[1]
+            party = member_splits[2]
+
+            # Remove the trailing
+            cons = cons.rstrip(")")
+            party = party.rstrip(")")
+        except IndexError:
+            # TODO: consider this warning message
+            warn_member_details = "Member details incorrectly formatted"
     else:
-        member_name = "INSERT MEMBER NAME"
-        cons = "INSERT CONSTITUENCY"
-        party = "PARTY"
         warn_member_details = "Can't find member details"
 
     # convert time_code into datetime
@@ -137,6 +159,8 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
 
     # creating a list which splits on line break and removes empty paragraphs
     para_list = [para for para in speech.split("\n") if para.strip()]
+
+    # TODO: split out the XML creation into a separate function
 
     # Creating XML output, start with root
     output_element = etree.Element("root")
@@ -193,11 +217,13 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         element.tail = "\n"
 
     # gets member name for file name
-    member_name_split = member_name.split()
-    firstname = member_name_split[0]
-    lastname = member_name_split[1]
+    # member_name_split = member_name.split()
+    # firstname = member_name_split[0]
+    # lastname = member_name_split[1]
 
-    output_file_path = Path(output_folder, f"{firstname}_{lastname}.xml")
+    file_name = member_name.replace(" ", "_")
+
+    output_file_path = Path(output_folder, f"{file_name}.xml")
 
     output_tree = etree.ElementTree(output_element)
     output_tree.write(
