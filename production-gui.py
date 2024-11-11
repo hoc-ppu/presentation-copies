@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import filedialog, ttk, messagebox
+from tkinter import filedialog, messagebox, ttk
+
 import speech_functions
 
 
@@ -30,7 +31,8 @@ root.title("Presentation Copies | Download and Save Content")
 
 # creating the window
 mainframe = ttk.Frame(root, padding="3 3 12 12")
-mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+# mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+mainframe.grid(column=0, row=0, sticky="nsew")
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
@@ -38,7 +40,8 @@ root.rowconfigure(0, weight=1)
 # depending on size of URL
 url = tk.StringVar()
 url_entry = ttk.Entry(mainframe, width=100, textvariable=url)
-url_entry.grid(column=2, row=1, sticky=(tk.W, tk.E))
+# url_entry.grid(column=2, row=1, sticky=(tk.W, tk.E))
+url_entry.grid(column=2, row=1, sticky="we")
 url.set(
     "https://hansard.parliament.uk/Commons/2024-10-10/debates/4D26F1DB-5194-49CD-85CF-087377B7A3DB/SportTeamGBAndParalympicsgb#contribution-B7C30195-448D-4087-9106-EDDC8FC517B7"
 )
@@ -56,7 +59,8 @@ folder_text = tk.StringVar()
 folder = tk.Entry(mainframe, textvariable=folder_text)
 new_text = "folder file path"
 folder_text.set(new_text)
-folder.grid(column=2, row=2, sticky=(tk.W, tk.E))
+# folder.grid(column=2, row=2, sticky=(tk.W, tk.E))
+folder.grid(column=2, row=2, sticky="we")
 
 # execute button
 ttk.Button(mainframe, text="Finish", command=save).grid(column=2, row=3, sticky=tk.W)
