@@ -121,7 +121,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
 
     # adding extra info that can be automated later
     chamber = "House of Commons"
-    speech_type = "The Maiden Speech"
+    speech_type = "Maiden Speech"
 
     member_name = "INSERT MEMBER NAME"
     cons = "INSERT CONSTITUENCY"
@@ -131,7 +131,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         # split attributed to value into member name and details of member
         member_splits = member_details.split(" (")
         try:
-            member_name = member_splits[0]
+            member_name = f"{member_splits[0]} MP"
             cons = member_splits[1]
             party = member_splits[2]
 
@@ -194,7 +194,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
 
     # Create the details element for constituency and party
     details_element = SubElement(member_details, "details")
-    details_element.text = f" ({cons}) ({party})"
+    details_element.text = f" ({cons}) ({party}) "
 
     # adding tag to each paragraph which is currently in a list
     for paragraph in para_list:
@@ -214,7 +214,20 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         em.tag = "I"
 
     for element in output_element.iterchildren():
+        if element.tag == "member_details":
+            # Stuart does not want a new line after the details
+            continue
         element.tail = "\n"
+
+    if len(output_element) > 0:
+        # The last element must not have a newline
+        last_child = output_element[-1]
+
+        if last_child.tail is not None:
+            last_child.tail = last_child.tail.rstrip()
+
+        if output_element.tail is not None:
+            output_element.tail = output_element.tail.rstrip()
 
     # gets member name for file name
     # member_name_split = member_name.split()
