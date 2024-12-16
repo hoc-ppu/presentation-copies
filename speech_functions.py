@@ -26,8 +26,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     This function takes a share link from the production-gui and
     returns an XML file with the speech content.
     """
-
-
     try:
         # splitting the share link #contribution-
         url_string_split = share_link.split("#contribution-")
@@ -53,7 +51,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         DebateSectionExtId_data = response.json()
     except Exception:
         raise Exception(f"Failed to fetch the Hansard Data.\n\nIf working from home check you're logged into the VPN and then check there isn't a typo in your website link.\n\n Copy and paste the link from Click Up and try again.\n\n\n If it doesn't fix it let the tech team know.\nGive tech team this link {ext_id_url}.")
-
 
     DebateSectionExtId = ""
 
@@ -128,7 +125,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     chamber = "House of Commons"
     speech_type = "Maiden Speech"
 
-
     member_name = "INSERT MEMBER NAME"
     cons = "INSERT CONSTITUENCY"
     party = "PARTY"
@@ -150,7 +146,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     else:
         warn_member_details = "No member details in the data. \nAdd the member name, constituency and party details manually in the indesign document."
 
-
     # convert time_code into datetime
     if time_code:
         dt = datetime.fromisoformat(time_code)
@@ -163,7 +158,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         formatted_date = "INSERT DATE"
         formatted_time = "INSERT TIME"
         warn_datetime = "No date or time in the data.\nEnter the date and time in the Indesign document manually"
-
 
     # creating a list which splits on line break and removes empty paragraphs
     para_list = [para for para in speech.split("\n") if para.strip()]
@@ -205,7 +199,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
 
     details_element.text = f" ({cons}) ({party}) "
 
-
     # adding tag to each paragraph which is currently in a list
     for paragraph in para_list:
 
@@ -243,7 +236,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     # member_name_split = member_name.split()
     # firstname = member_name_split[0]
     # lastname = member_name_split[1]
-
 
     file_name = member_name.replace(" ", "_")
 
