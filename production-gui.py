@@ -29,6 +29,7 @@ def save():
 root = tk.Tk()
 root.title("Presentation Copies | Download and Save Content [V1]")
 
+
 # creating the window
 mainframe = ttk.Frame(root, padding="3 3 12 12")
 # mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
@@ -38,12 +39,12 @@ root.rowconfigure(0, weight=1)
 
 ttk.Label(mainframe, text="Insert the website URL from Click Up into the box below").grid(column=1, columnspan=2, row=1, sticky="nw")
 
-
 # input field - would text widget be better so can wrap
 # depending on size of URL
 url = tk.StringVar()
 url_entry = ttk.Entry(mainframe, width=100, textvariable=url)
 # url_entry.grid(column=2, row=1, sticky=(tk.W, tk.E))
+
 url_entry.grid(column=2, row=2, sticky="we")
 url.set("")
 
@@ -61,10 +62,12 @@ folder = tk.Entry(mainframe, textvariable=folder_text)
 new_text = ""
 folder_text.set(new_text)
 # folder.grid(column=2, row=2, sticky=(tk.W, tk.E))
+
 folder.grid(column=2, row=3, sticky="we")
 
 # execute button
 ttk.Button(mainframe, text="Finish", command=save).grid(column=2, row=4, sticky=tk.W)
+
 
 # adding padding around widgets
 for child in mainframe.winfo_children():
