@@ -12,6 +12,7 @@ HANSARD_DEBATES_URL_BASE = "https://hansard-api.parliament.uk/debates/debate/"
 # this function is the same as the presentation copies script
 # turned into a function to use with tkinter GUI
 
+# TODO: force speech empty error
 # TODO: return line 46 and any others, create separate functions
 # TODO: add instruction to screenshot/report error to documentation
 # TODO: add raised exceptions as "e" for logger?
@@ -20,25 +21,22 @@ HANSARD_DEBATES_URL_BASE = "https://hansard-api.parliament.uk/debates/debate/"
 
 
 def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
-    # TODO: consider revising the doc string
     """
     This function takes a share link from the production-gui and
     returns an XML file with the speech content.
     """
-    # inserts link from production-gui
-    # TODO: has user entered expected format
 
-    # TODO: check if string_split is array with at least 2 elements
     try:
         # splitting the share link #contribution-
         url_string_split = share_link.split("#contribution-")
         # second value out of a list of two 0,1
         content_item_external_id = url_string_split[1]
     except Exception:
-        raise Exception("Website Link(URL)is invalid, check link and try again")
-
-    # creating a variable which adds the string from above which is the
-        # external ID
+        raise Exception("Website Link (URL) is invalid. Nothing serious. This could just be a typo, try copy and pasting the link from Click Up again. If it doesn't fix it let the tech team know")
+    """
+    creating a variable which adds the string from above which is the
+    external ID
+    """
     ext_id_url = (
         "https://hansard-api.parliament.uk/search/"
         "debatebyexternalid.json?contentItemExternal"
@@ -51,22 +49,20 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         # creating a variable with the response from the above request
         DebateSectionExtId_data = response.json()
     except Exception:
-        raise Exception(f"Search hansard api URL failed{ext_id_url}. Check for typos in the pasted link and try again")
+        raise Exception(f"Failed to fetch the Hansard Data.\n\nIf working from home check you're logged into the VPN and then check there isn't a typo in your website link.\n\n Copy and paste the link from Click Up and try again.\n\n\n If it doesn't fix it let the tech team know.\nGive tech team this link {ext_id_url}.")
 
     DebateSectionExtId = ""
 
     # use the response to get the DebateSectionExtId value
     for item in DebateSectionExtId_data.get("Results", []):
         DebateSectionExtId = item.get("DebateSectionExtId")
-    # TODO: does this ever get raised? Does function above return NoneType? YES
     if not DebateSectionExtId:
         raise Exception(
-            f"Unable to find DebateSectionExtId in search results {ext_id_url}."
-            " Check for typos pasted link and try again"
-        )
-
-    # create URL that fetches the maiden speech content and the
-    # title of the speech
+            f"Unable to find the debate information from the website link.\n\nCheck the website link for typos and try again.\n\n\nIf it doesn't fix it let the tech team know.\n\nGive tech team this link {ext_id_url}.")
+    """
+    create URL that fetches the maiden speech content and the
+    title of the speech
+    """
     create_url_template = "{}{}.json"
     url = create_url_template.format(HANSARD_DEBATES_URL_BASE, DebateSectionExtId)
 
@@ -77,7 +73,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
         maiden_speech_data = response_api.json()
     except Exception:
         raise Exception(
-            f"Problem getting data from the API {HANSARD_DEBATES_URL_BASE}"
+            f"Unable to find the speech information from the website link.\n\nCheck the website link for typos and try again.\n\n\nIf it doesn't fix it let the tech team know.\n\nGive tech team this link {url}"
         )
 
     overview = maiden_speech_data.get("Overview", {})
@@ -89,14 +85,14 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     warn_datetime = ""
     warn_member_details = ""
 
-    # TODO: is a loop necessary? Can we get it directly?
     debate_title = overview.get("Title", "INSERT TITLE")
     if debate_title == "INSERT TITLE":
-        warn_title = "No title found in the json"
+        warn_title = "No debate title in the data.Insert Debate Title manually"
 
-    # Set default values of below items to none and empty
-    # Allows program to run with empty returns
-
+    """
+    Set default values of below items to none and empty
+    Allows program to run with empty returns
+    """
     time_code = None
     member_details = None
     speech = ""
@@ -105,8 +101,10 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     for item in maiden_speech_data.get("Items", []):
         if item.get("ExternalId") == content_item_external_id:
             ext_id_found = True
+            """
             # added boolean check for error if contentID is not found in
             # results
+            """
             speech = item.get("Value", "")
             if speech == "":
                 raise Exception("Speech is missing from data")
@@ -117,7 +115,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     #       concatenate them together.
 
     if ext_id_found is False:
-        raise Exception("Check for a blank space or typo at end of URL and try again. ContentExternalID not found")
+        raise Exception("Website Link not working.\n\nCheck for a blank space or typo at end of URL and try again.\n\n\nContentExternalID not found")
 
     # adding extra info that can be automated later
     chamber = "House of Commons"
@@ -140,9 +138,9 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
             party = party.rstrip(")")
         except IndexError:
             # TODO: consider this warning message
-            warn_member_details = "Member details incorrectly formatted"
+            warn_member_details = "Member details incorrectly formatted in the data.\nDouble check the Member Name, Constituency and Party are correct in the document"
     else:
-        warn_member_details = "Can't find member details"
+        warn_member_details = "No member details in the data. \nAdd the member name, constituency and party details manually in the indesign document."
 
     # convert time_code into datetime
     if time_code:
@@ -155,7 +153,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     else:
         formatted_date = "INSERT DATE"
         formatted_time = "INSERT TIME"
-        warn_datetime = "Can't find the date or time in the JSON"
+        warn_datetime = "No date or time in the data.\nEnter the date and time in the Indesign document manually"
 
     # creating a list which splits on line break and removes empty paragraphs
     para_list = [para for para in speech.split("\n") if para.strip()]
@@ -215,11 +213,6 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
 
     for element in output_element.iterchildren():
         element.tail = "\n"
-
-    # gets member name for file name
-    # member_name_split = member_name.split()
-    # firstname = member_name_split[0]
-    # lastname = member_name_split[1]
 
     file_name = member_name.replace(" ", "_")
 
