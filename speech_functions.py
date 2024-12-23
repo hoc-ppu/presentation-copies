@@ -20,11 +20,18 @@ HANSARD_DEBATES_URL_BASE = "https://hansard-api.parliament.uk/debates/debate/"
 # TODO: consider adding a logger
 
 
-def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
+# def get_debate_id(share_link: str, output_folder: str) -> tuple[str, str, str]:
+def get_contribution_id():
+
+    share_link = "https://hansard.parliament.uk/Commons/2024-11-13/debates/CABFF1BC-018C-4D72-AE6C-D557B598704D/EnvironmentalProtection#contribution-7E65CA15-760D-4D69-8DC4-41BF29C3A066"
 
     """
-    This function takes a share link from the production-gui and
-    returns an XML file with the speech content.
+    This function takes a share link from the production-gui
+    finds the contribution ID from the URL
+    Uses the contribution ID to insert into a search url
+    Uses this url to fetch json
+    collects the debate section id from the json
+    creates a new url with the debate section ID
     """
     try:
         # splitting the share link #contribution-
@@ -37,11 +44,23 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     creating a variable which adds the string from above which is the
     external ID
     """
+    return content_item_external_id
+
+
+contribution_id = get_contribution_id()
+
+
+def get_debate_api(contribution_id):
+    """
+    uses the contribution ID to do a search
+    to find the debate ID
+    uses that debate ID to return a URL
+    """
 
     ext_id_url = (
         "https://hansard-api.parliament.uk/search/"
         "debatebyexternalid.json?contentItemExternal"
-        f"Id={content_item_external_id}&house=Commons"
+        f"Id={contribution_id}&house=Commons"
     )
     # formatting the variable with the externalid
     try:
@@ -67,10 +86,22 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     """
     create_url_template = "{}{}.json"
     url = create_url_template.format(HANSARD_DEBATES_URL_BASE, DebateSectionExtId)
+    return url
 
+
+url_api = get_debate_api(contribution_id)
+
+
+def get_speech(url_api, contribution_id):
+    """
+    uses the url from the get debate function
+    the url fetches the full debate information
+    uses the content external ID from the get debate function
+    to find the speech section
+    """
     # fetching content from hansard API, program ends with error
     try:
-        response_api = requests.get(url)
+        response_api = requests.get(url_api)
         # creating a variable with the response from the above request
         maiden_speech_data = response_api.json()
     except Exception:
@@ -102,7 +133,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     ext_id_found = False
 
     for item in maiden_speech_data.get("Items", []):
-        if item.get("ExternalId") == content_item_external_id:
+        if item.get("ExternalId") == contribution_id:
             ext_id_found = True
             """
             # added boolean check for error if contentID is not found in
@@ -146,6 +177,7 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     else:
         warn_member_details = "No member details in the data. \nAdd the member name, constituency and party details manually in the indesign document."
 
+    # TODO: remove leading zero from date
     # convert time_code into datetime
     if time_code:
         dt = datetime.fromisoformat(time_code)
@@ -162,45 +194,72 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     # creating a list which splits on line break and removes empty paragraphs
     para_list = [para for para in speech.split("\n") if para.strip()]
 
+    speech_data = {
+        "debate_title": debate_title,
+        # "time_code": time_code,
+        # "member_details": member_details,
+        "speech": speech,
+        "chamber": chamber,
+        "speech_type": speech_type,
+        "member_name": member_name,
+        "cons": cons,
+        "party": party,
+        "formatted_date": formatted_date,
+        "formatted_time": formatted_time,
+        "para_list": para_list
+    }
+
+    warning_messages = {
+        "warn_title": warn_title,
+        "warn_datetime": warn_datetime,
+        "warn_member_details": warn_member_details,
+    }
+    return speech_data, warning_messages
+
+
+speech_data, warning_messages = get_speech(url_api, contribution_id)
+
+
+def create_speech_xml(speech_data):
     # TODO: split out the XML creation into a separate function
 
     # Creating XML output, start with root
     output_element = etree.Element("root")
 
     speech_type_ele = SubElement(output_element, "speech_type")
-    speech_type_ele.text = speech_type.strip()
+    speech_type_ele.text = speech_data.get("speech_type").strip()
 
     member_element = SubElement(output_element, "Member")
-    member_element.text = member_name.strip()
+    member_element.text = speech_data.get("member_name").strip()
 
     chamber_ele = SubElement(output_element, "chambers")
-    chamber_ele.text = chamber.strip()
+    chamber_ele.text = speech_data.get("chamber").strip()
 
     time_element = SubElement(output_element, "date")
-    time_element.text = formatted_date.strip()
+    time_element.text = speech_data.get("formatted_date").strip()
 
     # adding title element
     title_element = SubElement(output_element, "hs_2GenericHdg")
-    title_element.text = debate_title.strip()
+    title_element.text = speech_data.get("debate_title").strip()
 
     # adding timecode element
     time_element = SubElement(output_element, "hs_Timeline")
-    time_element.text = formatted_time.strip()
+    time_element.text = speech_data.get("formatted_time").strip()
 
     # Create the member_details element
     member_details = SubElement(output_element, "member_details")
 
     # Create and add the bold element for member name
     bold_element = SubElement(member_details, "bold")
-    bold_element.text = member_name
+    bold_element.text = speech_data.get("member_name")
 
     # Create the details element for constituency and party
     details_element = SubElement(member_details, "details")
 
-    details_element.text = f" ({cons}) ({party}) "
+    details_element.text = f" ({speech_data.get("cons")}) ({speech_data.get("party")}) "
 
     # adding tag to each paragraph which is currently in a list
-    for paragraph in para_list:
+    for paragraph in speech_data.get("para_list"):
 
         tag_name = "hs_Para"
 
@@ -237,14 +296,20 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     # firstname = member_name_split[0]
     # lastname = member_name_split[1]
 
-    file_name = member_name.replace(" ", "_")
+    file_name = speech_data.get("member_name").replace(" ", "_")
 
-    output_file_path = Path(output_folder, f"{file_name}.xml")
+    # output_file_path = Path(output_folder, f"{file_name}.xml")
 
     output_tree = etree.ElementTree(output_element)
-    output_tree.write(
+    """output_tree.write(
         str(output_file_path), encoding="utf-8", xml_declaration=True
     )
-
+    """
+    output_tree.write(
+        file_name + ".xml", encoding="utf-8", xml_declaration=True
+    )
     # TODO: is this the best way, maybe use logger?
-    return (warn_datetime, warn_title, warn_member_details)
+    return file_name + ".xml"
+
+
+file_name = create_speech_xml(speech_data)
