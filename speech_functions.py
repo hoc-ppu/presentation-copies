@@ -149,7 +149,8 @@ def get_speech(share_link: str, output_folder: str) -> tuple[str, str, str]:
     # convert time_code into datetime
     if time_code:
         dt = datetime.fromisoformat(time_code)
-        formatted_date = dt.strftime("%d %B %Y")
+        day = dt.strftime("%d").lstrip("0")  # get day and remove leading zero
+        formatted_date = dt.strftime(f"{day} %B %Y")
         hour = dt.strftime("%I").lstrip("0")  # Get hour and remove leading zero
         formatted_time = (
             f"{hour}.{dt.strftime('%M').lstrip('0')}{dt.strftime('%p').lower()}"
