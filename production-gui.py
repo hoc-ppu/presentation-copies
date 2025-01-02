@@ -27,7 +27,7 @@ def save():
 
 # creating the GUI root
 root = tk.Tk()
-root.title("Presentation Copies | Download and Save Content [V2]")
+root.title("Presentation Copies | Download and Save Content [v2.2]")
 
 
 # creating the window
